@@ -18,6 +18,9 @@ type Server struct {
 
 func (s *Server) Start() error {
 	app := gin.Default()
+	if !*s.Flags.Debug {
+		gin.SetMode("release")
+	}
 	jwt := &middleWareService{jwtService: s.JWTService, authDisabled: *s.Flags.NoAuth}
 	jwtAuth := jwt.mwCheckAuthentication()
 	jwtAdmin := jwt.mwCheckAdministratorRole()
@@ -36,6 +39,7 @@ func (s *Server) Start() error {
 	app.PUT("/hosts", jwtAuth, jwtAdmin, host.createHost)
 	app.GET("/hosts", jwtAuth, host.getHosts)
 	app.GET("/hosts/pk/:id", jwtAuth, host.getHostByID)
+	app.POST("/hosts/pk/:id", jwtAuth, jwtAdmin, host.updateHostByID)
 	app.DELETE("/hosts/pk/:id", jwtAuth, jwtAdmin, host.deleteHostByID)
 	app.PUT("/hostgroups", jwtAuth, jwtAdmin, host.createHostgroup)
 	app.GET("/hostgroups", jwtAuth, host.getHostgroups)

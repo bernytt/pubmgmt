@@ -99,6 +99,7 @@ type (
 		MaxRetry   *int
 		QueueSize  *int
 		Data       *string
+		Debug      *bool
 	}
 
 	UserRole uint64

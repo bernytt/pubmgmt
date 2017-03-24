@@ -59,7 +59,7 @@ func (service *TaskService) TasksSchedule() ([]pub.Task, error) {
 			if err := internal.Unmarshal(v, &task); err != nil {
 				return err
 			}
-			if task.Spec != "" {
+			if task.Spec != "" && !task.Suspended {
 				tasks = append(tasks, task)
 			}
 		}

@@ -1,6 +1,9 @@
 package http
 
 import (
+	"net/http"
+	"strconv"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/fengxsong/pubmgmt/api"
 	"gopkg.in/gin-gonic/gin.v1"
@@ -55,4 +58,13 @@ type errorResponse struct {
 // msgResponse is a generic response for sending a message when action is complete.
 type msgResponse struct {
 	Msg string `json:"msg,omitempty"`
+}
+
+func getID(ctx *gin.Context) uint64 {
+	ID, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		Error(ctx, err, http.StatusBadRequest, nil)
+		return 0
+	}
+	return ID
 }

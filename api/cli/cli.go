@@ -16,6 +16,7 @@ func ParseFlags() (*pub.CliFlags, error) {
 		MaxRetry:   kingpin.Flag("retry", "max retry times").Default("3").Int(),
 		QueueSize:  kingpin.Flag("coroutine", "sending mail or task queue size").Default("128").Short('c').Int(),
 		Data:       kingpin.Flag("data", "Path to the folder where the data is stored").Default(".").Short('d').String(),
+		Debug:      kingpin.Flag("debug", "turn on/off debug mode").Default("false").Bool(),
 	}
 	kingpin.Parse()
 	return flags, nil

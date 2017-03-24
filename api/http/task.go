@@ -80,6 +80,7 @@ func (t *TaskHandler) initTasksFromStore() {
 		return
 	}
 	for _, task := range tasks {
+		Infof(t.Logger, "sending scheduled task to scheduling channel: %s\n", task.Name)
 		t.scheduling <- &task
 	}
 	// using the same solution as cron _(:з)∠)_
@@ -112,6 +113,7 @@ func (t *TaskHandler) process() {
 	for {
 		select {
 		case task := <-t.incoming:
+			Infof(t.Logger, "starting to exec task %s: %s\n", task.Name)
 			evt := &event{
 				task:   task,
 				Result: make(map[string]interface{}),
@@ -120,6 +122,10 @@ func (t *TaskHandler) process() {
 				h, err := t.HostService.HostByName(host)
 				if err != nil {
 					evt.Result[host] = pub.ErrHostNotFound
+					continue
+				}
+				if !h.IsActive {
+					evt.Result[host] = pub.ErrHostInactive
 					continue
 				}
 				cli := &ssh.Client{
@@ -245,8 +251,8 @@ func (t *TaskHandler) getTaskByID(ctx *gin.Context) {
 		Error(ctx, err, http.StatusBadRequest, nil)
 		return
 	}
-	if task, err := t.TaskService.Task(id); err == pub.ErrTaskNotFound {
-		Error(ctx, err, http.StatusNotFound, nil)
+	if task, err := t.TaskService.Task(id); err == pub.ErrObjNotFound {
+		Error(ctx, pub.ErrTaskNotFound, http.StatusNotFound, nil)
 	} else if err != nil {
 		Error(ctx, err, http.StatusInternalServerError, t.Logger)
 	} else {
@@ -276,8 +282,8 @@ func (t *TaskHandler) modifyTaskByID(ctx *gin.Context) {
 		return
 	}
 	task, err := t.TaskService.Task(id)
-	if err == pub.ErrTaskNotFound {
-		Error(ctx, err, http.StatusNotFound, nil)
+	if err == pub.ErrObjNotFound {
+		Error(ctx, pub.ErrTaskNotFound, http.StatusNotFound, nil)
 		return
 	} else if err != nil {
 		Error(ctx, err, http.StatusInternalServerError, t.Logger)

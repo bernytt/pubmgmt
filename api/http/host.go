@@ -119,6 +119,7 @@ func (h *HostHandler) createHost(ctx *gin.Context) {
 	reqHost.Password = req.Password
 	reqHost.IdentityFile = req.IdentityFile
 	reqHost.Comment = req.Comment
+	reqHost.IsActive = req.IsActive
 	err = h.HostService.CreateHost(reqHost)
 	if err != nil {
 		Error(ctx, err, http.StatusInternalServerError, h.Logger)
@@ -134,6 +135,7 @@ type putHostRequest struct {
 	HostgroupID  uint64 `json:"hostgroup_id"`
 	IdentityFile string `json:"identity_file"`
 	Comment      string `json:"comment"`
+	IsActive     bool   `json:"is_active"`
 }
 
 // url: /hosts  method: GET
@@ -170,27 +172,72 @@ func (h *HostHandler) getHostByID(ctx *gin.Context) {
 
 // url: /hosts/pk/:id method: POST
 func (h *HostHandler) updateHostByID(ctx *gin.Context) {
-	//
+	host := h._getHostByID(ctx)
+	if host == nil {
+		return
+	}
+	var req postHostRequest
+	if err := ctx.BindJSON(&req); err != nil {
+		Error(ctx, err, http.StatusBadRequest, nil)
+		return
+	}
+	if req.Hostname != "" {
+		host.Hostname = req.Hostname
+	}
+	if req.Password != "" {
+		host.Password = req.Password
+	}
+	if req.HostgroupID != 0 {
+		host.HostgroupID = req.HostgroupID
+	}
+	if req.IdentityFile != "" {
+		host.IdentityFile = req.IdentityFile
+	}
+	if req.Comment != "" {
+		host.Comment = req.Comment
+	}
+	host.IsActive = req.IsActive
+	err := h.HostService.UpdateHost(host.ID, host)
+	if err != nil {
+		Error(ctx, err, http.StatusInternalServerError, nil)
+	} else {
+		ctx.IndentedJSON(http.StatusOK, &msgResponse{Msg: "Update host success"})
+	}
+}
+
+type postHostRequest struct {
+	ID           uint64
+	Hostname     string `json:"hostname"`
+	Password     string `json:"password,omitempty"`
+	HostgroupID  uint64 `json:"hostgroup_id"`
+	IdentityFile string `json:"identity_file,omitempty"`
+	Comment      string `json:"comment"`
+	IsActive     bool   `json:"is_active"`
+}
+
+func (h *HostHandler) _getHostByID(ctx *gin.Context) *pub.Host {
+	ID := getID(ctx)
+	if ID == 0 {
+		return nil
+	}
+	host, err := h.HostService.Host(ID)
+	if err == nil {
+		return host
+	} else if err == pub.ErrObjNotFound {
+		Error(ctx, pub.ErrHostNotFound, http.StatusNotFound, nil)
+	} else {
+		Error(ctx, err, http.StatusInternalServerError, h.Logger)
+	}
+	return nil
 }
 
 // url: /hosts/pk/:id method: DELETE
 func (h *HostHandler) deleteHostByID(ctx *gin.Context) {
-	ID, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if err != nil {
-		Error(ctx, err, http.StatusBadRequest, nil)
+	host := h._getHostByID(ctx)
+	if host == nil {
 		return
 	}
-
-	_, err = h.HostService.Host(ID)
-
-	if err == pub.ErrObjNotFound {
-		Error(ctx, pub.ErrHostNotFound, http.StatusNotFound, nil)
-		return
-	} else if err != nil {
-		Error(ctx, err, http.StatusInternalServerError, h.Logger)
-		return
-	}
-	err = h.HostService.DeleteHost(ID)
+	err := h.HostService.DeleteHost(host.ID)
 	if err != nil {
 		Error(ctx, err, http.StatusInternalServerError, h.Logger)
 		return
