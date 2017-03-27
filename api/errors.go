@@ -52,6 +52,12 @@ const (
 	ErrCronSetEmpty = Error("Not any cron jobs yet")
 )
 
+// Modules errors
+const (
+	ErrSvnInfoSetEmpty = Error("Not any svn infos yet")
+	ErrSvnInfoNotFound = Error("Svn info not found")
+)
+
 // Crypto errors.
 const (
 	ErrCryptoHashFailure = Error("Unable to hash data")

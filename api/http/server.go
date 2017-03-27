@@ -14,6 +14,7 @@ type Server struct {
 	HostService   pub.HostService
 	MailerService pub.MailerService
 	TaskService   pub.TaskService
+	ModuleService pub.ModuleService
 }
 
 func (s *Server) Start() error {
@@ -29,6 +30,7 @@ func (s *Server) Start() error {
 	host := &HostHandler{Logger: s.Logger, HostService: s.HostService}
 	mailer := newMailerHandler(s.UserService, s.MailerService, s.Flags)
 	task := newTaskHandler(s.Logger, s.HostService, s.TaskService, s.Flags)
+	modules := &ModuleHandler{Logger: s.Logger, ModuleService: s.ModuleService}
 	app.PUT("/users", user.createUser)
 	app.GET("/users", jwtAuth, jwtAdmin, user.getUsers)
 	app.GET("/users/profile/:id", jwtAuth, user.getUserProfileByID)
@@ -58,6 +60,11 @@ func (s *Server) Start() error {
 	app.GET("/crons/detail/:id", jwtAuth, task.getCronJobByID)
 	app.POST("/crons/detail/:id", jwtAuth, jwtAdmin, task.modifyCronJobByID)
 	app.DELETE("/crons/detail/:id", jwtAuth, jwtAdmin, task.deleteCronJobByID)
+	app.PUT("/modules/svn", jwtAuth, jwtAdmin, modules.createSvnInfo)
+	app.GET("/modules/svn", jwtAuth, modules.getSvnInfos)
+	app.GET("/modules/svn/:id", jwtAuth, modules.getSvnByID)
+	app.POST("/modules/svn/:id", jwtAuth, jwtAdmin, modules.updateSvnByID)
+	app.DELETE("/modules/svn/:id", jwtAuth, jwtAdmin, modules.deleteSvnByID)
 	go user.checkAdminExists()
 	return app.Run(*s.Flags.Addr)
 }

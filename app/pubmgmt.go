@@ -50,6 +50,7 @@ func main() {
 		HostService:   store.HostService,
 		MailerService: store.MailerService,
 		TaskService:   store.TaskService,
+		ModuleService: store.ModuleService,
 	}
 	err := server.Start()
 	if err != nil {

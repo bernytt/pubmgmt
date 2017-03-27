@@ -80,6 +80,14 @@ type (
 		CreateCron(cron *Cron) error
 		DeleteCron(ID uint64) error
 	}
+
+	ModuleService interface {
+		SvnByID(id uint64) (*SubversionInfo, error)
+		SvnInfos() ([]SubversionInfo, error)
+		CreateSvnInfo(svnInfo *SubversionInfo) error
+		UpdateSvnInfo(id uint64, svnInfo *SubversionInfo) error
+		DeleteSvnInfo(id uint64) error
+	}
 )
 
 const (

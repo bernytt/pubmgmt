@@ -16,6 +16,7 @@ type Store struct {
 	HostService   *HostService
 	MailerService *MailerService
 	TaskService   *TaskService
+	ModuleService *ModuleService
 	db            *bolt.DB
 }
 
@@ -27,6 +28,7 @@ const (
 	emailBucketName     = "emails"
 	taskBucketName      = "tasks"
 	cronBucketName      = "crons"
+	svnInfoBucketName   = "svninfos"
 )
 
 var bucketFuncMap = map[string]func() pub.Model{
@@ -36,6 +38,7 @@ var bucketFuncMap = map[string]func() pub.Model{
 	emailBucketName:     func() pub.Model { return &pub.Email{} },
 	taskBucketName:      func() pub.Model { return &pub.Task{} },
 	cronBucketName:      func() pub.Model { return &pub.Cron{} },
+	svnInfoBucketName:   func() pub.Model { return &pub.SubversionInfo{} },
 }
 
 func NewStore(storePath string) (*Store, error) {
@@ -45,11 +48,13 @@ func NewStore(storePath string) (*Store, error) {
 		HostService:   &HostService{},
 		MailerService: &MailerService{},
 		TaskService:   &TaskService{},
+		ModuleService: &ModuleService{},
 	}
 	store.UserService.store = store
 	store.HostService.store = store
 	store.MailerService.store = store
 	store.TaskService.store = store
+	store.ModuleService.store = store
 	return store, nil
 }
 
@@ -75,6 +80,21 @@ func (store *Store) Close() error {
 		return store.db.Close()
 	}
 	return nil
+}
+
+func (store *Store) hasID(bucketName string, ID uint64) bool {
+	err := store.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucketName))
+		value := bucket.Get(internal.Itob(ID))
+		if value == nil {
+			return pub.ErrObjNotFound
+		}
+		return nil
+	})
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // container is a struct pointer

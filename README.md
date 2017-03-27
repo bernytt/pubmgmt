@@ -6,6 +6,15 @@
 * [jwt-go][4] authentication
 * [kinpin][5] command-line option parser
 
+### install
+
+    get get -u github.com/fengxsong/pubmgmt
+
+### get start
+
+    cd $GOPATH/src/github.com/fengxsong/pubmgmt
+    go run app/pubmgmt.go --help
+
 NOW IT'S IN EARLY STATE(backend is almost done) BUT... FELL FREE TO HAVE A TRY :)
 
 I had only code `subversion` and a very simple `shell` module.

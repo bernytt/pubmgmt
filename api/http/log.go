@@ -18,6 +18,7 @@ const (
 	ErrInvalidQueryFormat = pub.Error("Invalid query format")
 	// ErrEmptyResponseBody defines an error raised when portainer excepts to parse the body of a HTTP response and there is nothing to parse
 	ErrEmptyResponseBody = pub.Error("Empty response body")
+	errIDField           = pub.Error("ID field must equal to ID param in request uri")
 )
 
 type logger *log.Logger
