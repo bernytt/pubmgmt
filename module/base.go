@@ -7,10 +7,10 @@ import (
 	"github.com/fengxsong/pubmgmt/helper"
 )
 
-var Modules = map[string]func() Module{}
+var Modules = make(map[string]func() Module)
 
 type Module interface {
-	Build() *ExecCommand
+	Build() (*ExecCommand, error)
 	Name() string
 }
 
@@ -22,7 +22,7 @@ func GetModules() []string {
 	return modules
 }
 
-func NewExecCommand(m Module) *ExecCommand {
+func NewExecCommand(m Module) (*ExecCommand, error) {
 	return m.Build()
 }
 

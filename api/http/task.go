@@ -188,7 +188,11 @@ func (t *TaskHandler) createTask(ctx *gin.Context) {
 		Error(ctx, err, http.StatusBadRequest, nil)
 		return
 	}
-	c := module.NewExecCommand(reqModule)
+	c, err := module.NewExecCommand(reqModule)
+	if err != nil {
+		Error(ctx, err, http.StatusBadRequest, nil)
+		return
+	}
 	task := &pub.Task{
 		Name:             req.Name + time.Now().Format(".2006-01-02|15:04:05"),
 		RequiredUserID:   tokenData.ID,

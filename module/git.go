@@ -12,12 +12,12 @@ type Git struct {
 	EventType   EventType `json:"event_type"`
 }
 
-func (g *Git) Build() *ExecCommand {
+func (g *Git) Build() (*ExecCommand, error) {
 	c := &ExecCommand{
 		Environment: g.Environment,
 		Command:     g.GitPath,
 	}
-	return c
+	return c, nil
 }
 
 func (g *Git) Name() string { return "git" }

@@ -36,7 +36,7 @@ type Subversion struct {
 
 func (s *Subversion) Name() string { return "subversion" }
 
-func (s *Subversion) Build() *ExecCommand {
+func (s *Subversion) Build() (*ExecCommand, error) {
 	if s.SvnPath == "" {
 		s.SvnPath = "/usr/bin/svn"
 	}
@@ -80,7 +80,7 @@ func (s *Subversion) Build() *ExecCommand {
 		c.Arguments = append(c.Arguments, []string{"revert", "-R", s.Dest}...)
 	default:
 	}
-	return c
+	return c, nil
 }
 
 func init() {
