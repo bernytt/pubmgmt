@@ -100,6 +100,7 @@ type (
 	CliFlags struct {
 		Addr       *string
 		NoAuth     *bool
+		ApiPrefix  *string
 		SmtpServer *string
 		Username   *string
 		Password   *string
